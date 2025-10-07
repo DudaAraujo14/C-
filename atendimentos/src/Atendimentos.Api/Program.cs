@@ -1,57 +1,40 @@
+using Atendimentos.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Atendimentos.Infrastructure.Context; // DbContext
+using Atendimentos.Domain.Repositories;
+using Atendimentos.Infrastructure.Repositories;
+using Atendimentos.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==============================
-// 🔧 Banco Oracle (connection em appsettings.json -> "DefaultConnection")
-// ==============================
+// 🗄️ Configuração do banco de dados Oracle
 builder.Services.AddDbContext<AtendimentosDbContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ========================================
-// 🧩 DI: Repositories + Services (nomes totalmente qualificados)
-// ========================================
-
+// ✅ REPOSITÓRIOS E SERVIÇOS REGISTRADOS
 // MESA
-builder.Services.AddScoped<
-    Atendimentos.Domain.Repositories.IMesaRepository,
-    Atendimentos.Infrastructure.Repositories.MesaRepository>();
-
-builder.Services.AddScoped<
-    Atendimentos.Application.Services.IMesaService,
-    Atendimentos.Application.Services.MesaService>();
+builder.Services.AddScoped<IMesaRepository, MesaRepository>();
+builder.Services.AddScoped<IMesaService, MesaService>();
 
 // GARÇOM
-builder.Services.AddScoped<
-    Atendimentos.Domain.Repositories.IGarcomRepository,
-    Atendimentos.Infrastructure.Repositories.GarcomRepository>();
-
-builder.Services.AddScoped<
-    Atendimentos.Application.Services.IGarcomService,
-    Atendimentos.Application.Services.GarcomService>();
+builder.Services.AddScoped<IGarcomRepository, GarcomRepository>();
+builder.Services.AddScoped<IGarcomService, GarcomService>();
 
 // COMANDA
-builder.Services.AddScoped<
-    Atendimentos.Domain.Repositories.IComandaRepository,
-    Atendimentos.Infrastructure.Repositories.ComandaRepository>();
+builder.Services.AddScoped<IComandaRepository, ComandaRepository>();
+builder.Services.AddScoped<IComandaService, ComandaService>();
 
-builder.Services.AddScoped<
-    Atendimentos.Application.Services.IComandaService,
-    Atendimentos.Application.Services.ComandaService>();
+// CLIENTE ✅
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
 
-// ========================================
-// 🧱 ASP.NET
-// ========================================
+// 🚀 Configurações básicas
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ========================================
-// 🚀 Pipeline
-// ========================================
+// 🔧 Configuração do Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -60,7 +43,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
