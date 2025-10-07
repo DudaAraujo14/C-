@@ -1,66 +1,76 @@
 using Atendimentos.Application.DTOs;
 using Atendimentos.Domain.Entities;
-using Atendimentos.Domain.Enums;
 using Atendimentos.Domain.Repositories;
 
-namespace Atendimentos.Application.Services;
-
-public class MesaService : IMesaService
+namespace Atendimentos.Application.Services
 {
-    private readonly IMesaRepository _repo;
-
-    public MesaService(IMesaRepository repo)
+    public class MesaService : IMesaService
     {
-        _repo = repo;
+        private readonly IMesaRepository _mesaRepository;
+
+        public MesaService(IMesaRepository mesaRepository)
+        {
+            _mesaRepository = mesaRepository;
+        }
+
+        public async Task<MesaDto> CriarMesaAsync(MesaCreateDto dto)
+        {
+            var mesa = new Mesa(dto.Numero, dto.Capacidade, dto.Localizacao, dto.QrCode);
+            await _mesaRepository.CriarAsync(mesa);
+
+            return MapToDto(mesa);
+        }
+
+        public async Task<IEnumerable<MesaDto>> ObterTodasAsync()
+        {
+            var mesas = await _mesaRepository.ObterTodasAsync();
+            return mesas.Select(MapToDto);
+        }
+
+        public async Task<MesaDto?> AtualizarMesaAsync(Guid id, MesaUpdateDto dto)
+        {
+            var mesa = await _mesaRepository.ObterPorIdAsync(id);
+            if (mesa == null)
+                return null;
+
+            mesa.AtualizarDados(dto.Capacidade, dto.Localizacao, dto.QrCode);
+            await _mesaRepository.AtualizarAsync(mesa);
+
+            return MapToDto(mesa);
+        }
+
+        public async Task<MesaDto?> AtualizarStatusAsync(Guid id, int novoStatus)
+        {
+            var mesa = await _mesaRepository.ObterPorIdAsync(id);
+            if (mesa == null)
+                return null;
+
+            mesa.AlterarStatus((Domain.Enums.MesaStatus)novoStatus);
+            await _mesaRepository.AtualizarAsync(mesa);
+
+            return MapToDto(mesa);
+        }
+
+        public async Task<bool> DeletarMesaAsync(Guid id)
+        {
+            var mesa = await _mesaRepository.ObterPorIdAsync(id);
+            if (mesa == null)
+                return false;
+
+            await _mesaRepository.DeletarAsync(id);
+            return true;
+        }
+
+        private static MesaDto MapToDto(Mesa mesa) => new MesaDto
+        {
+            Id = mesa.Id,
+            Numero = mesa.Numero,
+            Status = (int)mesa.Status,
+            Capacidade = mesa.Capacidade,
+            Localizacao = mesa.Localizacao,
+            QrCode = mesa.QrCode,
+            CreatedAt = mesa.CreatedAt,
+            UpdatedAt = mesa.UpdatedAt
+        };
     }
-
-    public async Task<MesaDto> CreateAsync(MesaCreateRequest input, CancellationToken ct = default)
-    {
-        var jaExiste = await _repo.GetByNumeroAsync(input.Numero, ct);
-        if (jaExiste is not null)
-            throw new InvalidOperationException($"Já existe mesa com número {input.Numero}.");
-
-        var mesa = new Mesa(input.Numero, input.Capacidade, input.Localizacao, input.QrCode);
-        await _repo.AddAsync(mesa, ct);
-        await _repo.SaveChangesAsync(ct);
-        return ToDto(mesa);
-    }
-
-    public async Task<MesaDto?> GetAsync(Guid id, CancellationToken ct = default)
-    {
-        var mesa = await _repo.GetByIdAsync(id, ct);
-        return mesa is null ? null : ToDto(mesa);
-    }
-
-    public async Task<IReadOnlyList<MesaDto>> ListAsync(MesaStatus? status, CancellationToken ct = default)
-    {
-        var list = await _repo.ListAsync(status, ct);
-        return list.Select(ToDto).ToList();
-    }
-
-    public async Task<bool> UpdateAsync(Guid id, MesaUpdateRequest input, CancellationToken ct = default)
-    {
-        var mesa = await _repo.GetByIdAsync(id, ct);
-        if (mesa is null) return false;
-
-        mesa.Atualizar(input.Capacidade, input.Localizacao, input.QrCode);
-        await _repo.UpdateAsync(mesa, ct);
-        await _repo.SaveChangesAsync(ct);
-        return true;
-    }
-
-    public async Task<bool> ChangeStatusAsync(Guid id, MesaChangeStatusRequest input, CancellationToken ct = default)
-    {
-        var mesa = await _repo.GetByIdAsync(id, ct);
-        if (mesa is null) return false;
-
-        mesa.DefinirStatus(input.Status);
-        await _repo.UpdateAsync(mesa, ct);
-        await _repo.SaveChangesAsync(ct);
-        return true;
-    }
-
-    private static MesaDto ToDto(Mesa m) => new(
-        m.Id, m.Numero, m.Status, m.Capacidade, m.Localizacao, m.QrCode, m.CreatedAt, m.UpdatedAt
-    );
 }

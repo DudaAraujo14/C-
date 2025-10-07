@@ -1,13 +1,13 @@
 using Atendimentos.Application.DTOs;
-using Atendimentos.Domain.Enums;
 
-namespace Atendimentos.Application.Services;
-
-public interface IMesaService
+namespace Atendimentos.Application.Services
 {
-    Task<MesaDto> CreateAsync(MesaCreateRequest input, CancellationToken ct = default);
-    Task<MesaDto?> GetAsync(Guid id, CancellationToken ct = default);
-    Task<IReadOnlyList<MesaDto>> ListAsync(MesaStatus? status, CancellationToken ct = default);
-    Task<bool> UpdateAsync(Guid id, MesaUpdateRequest input, CancellationToken ct = default);
-    Task<bool> ChangeStatusAsync(Guid id, MesaChangeStatusRequest input, CancellationToken ct = default);
+    public interface IMesaService
+    {
+        Task<MesaDto> CriarMesaAsync(MesaCreateDto dto);
+        Task<IEnumerable<MesaDto>> ObterTodasAsync();
+        Task<MesaDto?> AtualizarMesaAsync(Guid id, MesaUpdateDto dto);
+        Task<MesaDto?> AtualizarStatusAsync(Guid id, int novoStatus);
+        Task<bool> DeletarMesaAsync(Guid id);
+    }
 }

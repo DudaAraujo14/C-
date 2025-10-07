@@ -1,39 +1,52 @@
 using Atendimentos.Domain.Entities;
-using Atendimentos.Domain.Enums;
 using Atendimentos.Domain.Repositories;
+using Atendimentos.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Atendimentos.Infrastructure.Repositories;
 
-public class MesaRepository : IMesaRepository
+
+namespace Atendimentos.Infrastructure.Repositories
 {
-    private readonly AtendimentosDbContext _ctx;
-
-    public MesaRepository(AtendimentosDbContext ctx) => _ctx = ctx;
-
-    public Task<Mesa?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        => _ctx.Mesas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
-
-    public Task<Mesa?> GetByNumeroAsync(int numero, CancellationToken ct = default)
-        => _ctx.Mesas.AsNoTracking().FirstOrDefaultAsync(x => x.Numero == numero, ct);
-
-    public async Task<List<Mesa>> ListAsync(MesaStatus? status = null, CancellationToken ct = default)
+    public class MesaRepository : IMesaRepository
     {
-        var q = _ctx.Mesas.AsNoTracking().AsQueryable();
-        if (status.HasValue)
-            q = q.Where(x => x.Status == status);
-        return await q.OrderBy(x => x.Numero).ToListAsync(ct);
+        private readonly AtendimentosDbContext _context;
+
+        public MesaRepository(AtendimentosDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Mesa> CriarAsync(Mesa mesa)
+        {
+            await _context.Mesas.AddAsync(mesa);
+            await _context.SaveChangesAsync();
+            return mesa;
+        }
+
+        public async Task<Mesa?> ObterPorIdAsync(Guid id)
+        {
+            return await _context.Mesas.FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<IEnumerable<Mesa>> ObterTodasAsync()
+        {
+            return await _context.Mesas.AsNoTracking().ToListAsync();
+        }
+
+        public async Task AtualizarAsync(Mesa mesa)
+        {
+            _context.Mesas.Update(mesa);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeletarAsync(Guid id)
+        {
+            var mesa = await _context.Mesas.FindAsync(id);
+            if (mesa != null)
+            {
+                _context.Mesas.Remove(mesa);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
-
-    public async Task AddAsync(Mesa mesa, CancellationToken ct = default)
-        => await _ctx.Mesas.AddAsync(mesa, ct);
-
-    public Task UpdateAsync(Mesa mesa, CancellationToken ct = default)
-    {
-        _ctx.Mesas.Update(mesa);
-        return Task.CompletedTask;
-    }
-
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => _ctx.SaveChangesAsync(ct);
 }

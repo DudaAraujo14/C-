@@ -1,61 +1,62 @@
 using Atendimentos.Application.DTOs;
 using Atendimentos.Application.Services;
-using Atendimentos.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Atendimentos.Api.Controllers;
-
-[ApiController]
-[Route("mesas")]
-public class MesasController : ControllerBase
+namespace Atendimentos.Api.Controllers
 {
-    private readonly IMesaService _service;
-
-    public MesasController(IMesaService service)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MesasController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly IMesaService _mesaService;
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<MesaDto>>> List([FromQuery] MesaStatus? status, CancellationToken ct)
-        => Ok(await _service.ListAsync(status, ct));
-
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<MesaDto>> Get(Guid id, CancellationToken ct)
-    {
-        var mesa = await _service.GetAsync(id, ct);
-        return mesa is null ? NotFound() : Ok(mesa);
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<MesaDto>> Create([FromBody] MesaCreateRequest body, CancellationToken ct)
-    {
-        if (!ModelState.IsValid) return ValidationProblem(ModelState);
-
-        try
+        public MesasController(IMesaService mesaService)
         {
-            var created = await _service.CreateAsync(body, ct);
-            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+            _mesaService = mesaService;
         }
-        catch (InvalidOperationException ex)
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return Conflict(new { message = ex.Message });
+            var mesas = await _mesaService.ObterTodasAsync();
+            return Ok(mesas);
         }
-    }
 
-    [HttpPut("{id:guid}")]
-    public async Task<ActionResult> Update(Guid id, [FromBody] MesaUpdateRequest body, CancellationToken ct)
-    {
-        if (!ModelState.IsValid) return ValidationProblem(ModelState);
-        var ok = await _service.UpdateAsync(id, body, ct);
-        return ok ? NoContent() : NotFound();
-    }
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] MesaCreateDto dto)
+        {
+            var mesa = await _mesaService.CriarMesaAsync(dto);
+            return CreatedAtAction(nameof(GetAll), new { id = mesa.Id }, mesa);
+        }
 
-    [HttpPut("{id:guid}/status")]
-    public async Task<ActionResult> ChangeStatus(Guid id, [FromBody] MesaChangeStatusRequest body, CancellationToken ct)
-    {
-        if (!ModelState.IsValid) return ValidationProblem(ModelState);
-        var ok = await _service.ChangeStatusAsync(id, body, ct);
-        return ok ? NoContent() : NotFound();
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] MesaUpdateDto dto)
+        {
+            var resultado = await _mesaService.AtualizarMesaAsync(id, dto);
+            if (resultado == null)
+                return NotFound();
+
+            return Ok(resultado);
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] MesaStatusUpdateDto dto)
+        {
+            var resultado = await _mesaService.AtualizarStatusAsync(id, dto.Status);
+            if (resultado == null)
+                return NotFound();
+
+            return Ok(resultado);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var sucesso = await _mesaService.DeletarMesaAsync(id);
+            if (!sucesso)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }
