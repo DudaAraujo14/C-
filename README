@@ -792,7 +792,7 @@ POST /api/comandas?mesaId={mesa-guid}&garcomId={garcom-guid}
 
 ---
 
-## 👥 Integrantes do Grupo
+## 👥 Integrantes do Grupo 
 
 | Nome | RM | Função |
 |-------|-----|--------|
