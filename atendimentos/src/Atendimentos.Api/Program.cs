@@ -6,11 +6,12 @@ using Atendimentos.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🗄️ Configuração do banco de dados Oracle
+// Configuração do banco de dados Oracle
 builder.Services.AddDbContext<AtendimentosDbContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ✅ REPOSITÓRIOS E SERVIÇOS REGISTRADOS
+//  REPOSITÓRIOS E SERVIÇOS REGISTRADOS
+
 // MESA
 builder.Services.AddScoped<IMesaRepository, MesaRepository>();
 builder.Services.AddScoped<IMesaService, MesaService>();
@@ -23,18 +24,18 @@ builder.Services.AddScoped<IGarcomService, GarcomService>();
 builder.Services.AddScoped<IComandaRepository, ComandaRepository>();
 builder.Services.AddScoped<IComandaService, ComandaService>();
 
-// CLIENTE ✅
+// CLIENTE 
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 
-// 🚀 Configurações básicas
+// Configurações básicas
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// 🔧 Configuração do Swagger
+// Configuração do Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
