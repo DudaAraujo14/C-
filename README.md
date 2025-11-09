@@ -1,7 +1,7 @@
 # 🍽️ Sistema de Atendimentos de Restaurante
 
 Este projeto é uma **API RESTful desenvolvida em .NET 8** para o gerenciamento completo de atendimentos em um restaurante, incluindo controle de **mesas, garçons, comandas e clientes**.  
-O objetivo é oferecer uma base sólida e escalável para sistemas de gestão de atendimento, integrando **banco de dados Oracle** e **boas práticas de arquitetura limpa (Clean Architecture)**.
+O objetivo é oferecer uma base sólida e escalável para sistemas de gestão de atendimento, integrando **banco de dados Oracle** e aplicando **Clean Architecture** com **boas práticas de desenvolvimento .NET**.
 
 ---
 
@@ -17,8 +17,9 @@ O objetivo é oferecer uma base sólida e escalável para sistemas de gestão de
 8. [🧱 Migrations e Banco de Dados](#-migrations-e-banco-de-dados)  
 9. [🌐 Endpoints Principais (Swagger)](#-endpoints-principais-swagger)  
 10. [💾 Exemplos de Uso (Swagger)](#-exemplos-de-uso-swagger)  
-11. [🧠 Regras de Negócio Implementadas](#-regras-de-negócio-implementadas)  
-12. [👥 Integrantes do Grupo](#-integrantes-do-grupo)  
+11. [🔗 Implementações Avançadas (HATEOAS e Search)](#-implementações-avançadas-hateoas-e-search)  
+12. [🧠 Regras de Negócio Implementadas](#-regras-de-negócio-implementadas)  
+13. [👥 Integrantes do Grupo](#-integrantes-do-grupo)  
 
 ---
 
@@ -32,21 +33,22 @@ O **Sistema de Atendimentos de Restaurante** tem como objetivo digitalizar e aut
 - Registro de pedidos e cálculo automático do valor total.  
 - Persistência em banco de dados Oracle.  
 - Exposição de API RESTful documentada via Swagger.  
+- Implementação de **HATEOAS** e **rotas de busca com paginação e ordenação**.
 
 ---
 
 ## 🧩 Visão Geral e Arquitetura
 
-O projeto segue o padrão **Domain-Driven Design (DDD)** e aplica a **Clean Architecture**, garantindo separação de responsabilidades, facilidade de manutenção e baixo acoplamento entre camadas.
+O projeto segue o padrão **Domain-Driven Design (DDD)** e aplica a **Clean Architecture**, garantindo separação de responsabilidades e baixo acoplamento entre camadas.
 
 ```mermaid
 flowchart TD
     subgraph API_Camada_de_Controllers
-        A[Controllers]
+        A[Controllers / HATEOAS / Swagger]
     end
 
     subgraph Application_Casos_de_Uso
-        B[Use Cases / DTOs / Validations]
+        B[Services / DTOs / Validations]
     end
 
     subgraph Domain_Entidades_e_Regras_de_Negocio
@@ -56,14 +58,12 @@ flowchart TD
     subgraph Infrastructure_Banco_e_Integracoes
         D[EF Core / Repositórios]
         E[(Oracle Database)]
-        F[APIs Externas]
     end
 
     A --> B
     B --> C
     B --> D
     D --> E
-    D --> F
 ```
 
 ---
@@ -77,110 +77,78 @@ flowchart TD
 | ORM | **Entity Framework Core (Oracle Provider)** |
 | Banco de Dados | **Oracle Database (FIAP Cloud)** |
 | Documentação | **Swagger / Swashbuckle** |
+| HATEOAS | **Custom Helper com Links RESTful** |
+| Paginação e Filtros | **Linq + Dynamic Sorting Extension** |
 | Injeção de Dependência | **Built-in DI** |
-| Mapeamento de Objetos | **AutoMapper** |
-| Validação | **FluentValidation** |
+| Validação | **DataAnnotations / FluentValidation** |
 | Logs | **Serilog** |
-| Testes Unitários | **xUnit + FluentAssertions** |
 | Versionamento | **Git + GitHub** |
 
 ---
 
 ## 📋 Requisitos do Sistema
 
-### **Requisitos Funcionais (RF)**
-- RF01 – Cadastrar mesas, garçons e clientes.  
-- RF02 – Abrir e fechar comandas.  
-- RF03 – Adicionar itens à comanda.  
-- RF04 – Consultar mesas e comandas abertas.  
-- RF05 – Calcular automaticamente o valor total da comanda.  
-- RF06 – Atualizar status das mesas (Disponível, Ocupada, Reservada).  
+### **Requisitos Funcionais**
+- RF01 – CRUD completo de mesas, garçons, comandas e clientes.  
+- RF02 – Abertura e fechamento de comandas.  
+- RF03 – Endpoint `/search` com paginação, ordenação e filtros por nome.  
+- RF04 – Respostas enriquecidas com **HATEOAS**.  
 
-### **Requisitos Não Funcionais (RNF)**
-- RNF01 – Utilizar arquitetura limpa (Clean Architecture).  
-- RNF02 – Persistência com Entity Framework Core e Oracle.  
-- RNF03 – Retornar erros padronizados (HTTP + ProblemDetails).  
-- RNF04 – Documentar endpoints com Swagger.  
-- RNF05 – Disponibilidade mínima de 99%.  
-- RNF06 – Tempo médio de resposta inferior a 200ms.  
-- RNF07 – Logs estruturados com Serilog.  
+### **Requisitos Não Funcionais**
+- RNF01 – Clean Architecture.  
+- RNF02 – Persistência com EF Core + Oracle.  
+- RNF03 – Retornos HTTP padronizados.  
+- RNF04 – Documentação via Swagger.  
 
 ---
 
 ## 🏗️ Estrutura do Projeto
 
 ```bash
-atendimentos/
+src/
+├── Atendimentos.Api/
+│   ├── Controllers/
+│   │   ├── ClientesController.cs
+│   │   ├── ComandasController.cs
+│   │   ├── GarconsController.cs
+│   │   └── MesasController.cs
+│   ├── Helpers/
+│   │   └── HateoasHelper.cs
+│   ├── Program.cs
+│   └── appsettings.json
 │
-├── src/
-│   ├── Atendimentos.Api/                            # 🎯 Camada de apresentação (controllers)
-│   ├── Atendimentos.Application/                    # ⚙️ Casos de uso e DTOs
-│   ├── Atendimentos.Domain/                         # 🧩 Entidades e regras de negócio
-│   ├── Atendimentos.Infrastructure/                 # 🗄️ Banco e repositórios (EF Core)
-│   └── Atendimentos.Tests/                          # 🧪 Testes unitários
+├── Atendimentos.Application/
+│   ├── Services/
+│   │   ├── ClienteService.cs
+│   │   ├── ComandaService.cs
+│   │   ├── GarcomService.cs
+│   │   └── MesaService.cs
+│   └── DTOs/
+│       └── ClienteCreateDto.cs
 │
-└── README.md
+├── Atendimentos.Domain/
+│   ├── Entities/
+│   │   ├── Cliente.cs
+│   │   ├── Comanda.cs
+│   │   ├── Garcom.cs
+│   │   └── Mesa.cs
+│   └── Repositories/
+│
+└── Atendimentos.Infrastructure/
+    ├── Context/
+    │   └── AtendimentosDbContext.cs
+    ├── Repositories/
+    └── Migrations/
 ```
-```bash
-atendimentos/
-│
-├── src/
-│   ├── Atendimentos.Api/                            # 🎯 Camada de apresentação (endpoints / controllers)
-│   │   ├── Controllers/
-│   │   │   ├── MesasController.cs
-│   │   │   ├── GarconsController.cs
-│   │   │   ├── ComandasController.cs
-│   │   │   └── ClientesController.cs
-│   │   ├── Program.cs                               # Configuração de serviços e DI
-│   │   └── appsettings.json                         # Configuração de banco e ambiente
-│   │
-│   ├── Atendimentos.Application/                    # ⚙️ Camada de aplicação (serviços e DTOs)
-│   │   └── Services/
-│   │       ├── MesaService.cs
-│   │       ├── GarcomService.cs
-│   │       ├── ComandaService.cs
-│   │       └── ClienteService.cs
-│   │
-│   ├── Atendimentos.Domain/                         # 🧩 Camada de domínio (entidades e interfaces)
-│   │   ├── Entities/
-│   │   │   ├── Mesa.cs
-│   │   │   ├── Garcom.cs
-│   │   │   ├── Comanda.cs
-│   │   │   └── Cliente.cs
-│   │   └── Repositories/
-│   │       ├── IMesaRepository.cs
-│   │       ├── IGarcomRepository.cs
-│   │       ├── IComandaRepository.cs
-│   │       └── IClienteRepository.cs
-│   │
-│   ├── Atendimentos.Infrastructure/                 # 🗄️ Camada de infraestrutura (banco, repositórios)
-│   │   ├── Context/
-│   │   │   └── AtendimentosDbContext.cs
-│   │   ├── Repositories/
-│   │   │   ├── MesaRepository.cs
-│   │   │   ├── GarcomRepository.cs
-│   │   │   ├── ComandaRepository.cs
-│   │   │   └── ClienteRepository.cs
-│   │   └── Migrations/                              # Migrações do Entity Framework
-│   │       ├── 2025xxxxxx_InitialCreate.cs
-│   │       ├── AddGarcom.cs
-│   │       ├── AddComandaTable.cs
-│   │       └── AddClienteTable.cs
-│   │
-│   └── Atendimentos.Tests/                          # 🧪 Estrutura para testes unitários
-│       └── (futuros testes automatizados)
-│
-└── README.md                                        # 📘 Documentação do projeto
-```
+
 ---
 
 ## 🗃️ Entidades Principais
 
-### 🪑 Mesa
-- `Numero`
-- `Capacidade`
-- `Status`
-- `Localizacao`
+### 👤 Cliente
+- `Nome`
+- `CPF`
+- `Telefone`
 
 ### 🧑‍🍳 Garçom
 - `Nome`
@@ -188,19 +156,20 @@ atendimentos/
 - `Telefone`
 - `Ativo`
 
+### 🪑 Mesa
+- `Numero`
+- `Capacidade`
+- `Status`
+- `Localizacao`
+
 ### 🧾 Comanda
 - `MesaId`
 - `GarcomId`
 - `ClienteId`
-- `Status`
 - `DataAbertura`
 - `DataFechamento`
 - `ValorTotal`
-
-### 👤 Cliente
-- `Nome`
-- `CPF`
-- `Telefone`
+- `Status`
 
 ---
 
@@ -225,14 +194,15 @@ dotnet ef database update --project src/Atendimentos.Infrastructure --startup-pr
 ```bash
 dotnet run --project src/Atendimentos.Api
 ```
-Acesse: 👉 [http://localhost:5070/swagger](http://localhost:5070/swagger)
+
+Acesse 👉 **[http://localhost:5070/swagger](http://localhost:5070/swagger)**
 
 ---
 
 ## 🧱 Migrations e Banco de Dados
 
-A aplicação utiliza **Entity Framework Core** com **Oracle Database**.  
-Cada entidade possui uma migration associada para controle de versão do esquema.
+O projeto utiliza **Entity Framework Core (Oracle Provider)**, com migrações automáticas para versionamento de schema.  
+O contexto principal é `AtendimentosDbContext`.
 
 ---
 
@@ -240,21 +210,20 @@ Cada entidade possui uma migration associada para controle de versão do esquema
 
 | Entidade | Método | Endpoint | Descrição |
 |-----------|---------|-----------|------------|
-| **Mesas** | GET | `/api/mesas` | Lista mesas |
-|  | POST | `/api/mesas` | Cria mesa |
-|  | PUT | `/api/mesas/{id}` | Atualiza mesa |
-| **Garçons** | GET | `/api/garcons` | Lista garçons |
-|  | POST | `/api/garcons` | Cria garçom |
-| **Comandas** | POST | `/api/comandas` | Abre comanda |
-|  | PUT | `/api/comandas/{id}/fechar` | Fecha comanda |
-| **Clientes** | GET | `/api/clientes` | Lista clientes |
-|  | POST | `/api/clientes` | Cria cliente |
+| **Clientes** | `GET` | `/api/clientes` | Lista todos os clientes |
+|  | `GET` | `/api/clientes/{id}` | Busca cliente por ID (com links HATEOAS) |
+|  | `POST` | `/api/clientes` | Cria cliente |
+|  | `GET` | `/api/clientes/search` | Busca clientes com paginação e ordenação |
+|  | `DELETE` | `/api/clientes/{id}` | Remove cliente |
+| **Garçons** | `GET` | `/api/garcons` | Lista garçons |
+| **Mesas** | `GET` | `/api/mesas` | Lista mesas |
+| **Comandas** | `POST` | `/api/comandas` | Cria comanda |
 
 ---
 
 ## 💾 Exemplos de Uso (Swagger)
 
-### Criar Cliente
+### 🔹 Criar Cliente
 ```json
 POST /api/clientes
 {
@@ -264,41 +233,57 @@ POST /api/clientes
 }
 ```
 
-### Criar Mesa
+### 🔹 Buscar Clientes com Paginação
+```
+GET /api/clientes/search?nome=maria&page=1&pageSize=5&sortBy=Nome&order=asc
+```
+
+Exemplo de retorno com **HATEOAS**:
 ```json
-POST /api/mesas
 {
-  "numero": 3,
-  "capacidade": 4,
-  "localizacao": "Varanda"
+  "data": {
+    "id": "a5d2c4f8-9a41-4f21-8b77-d07a23bfa0e3",
+    "nome": "Maria Eduarda Araujo Penas",
+    "cpf": "12345678900",
+    "telefone": "11999998888"
+  },
+  "links": [
+    {"rel":"self","href":"/api/clientes/a5d2c4f8-9a41-4f21-8b77-d07a23bfa0e3","method":"GET"},
+    {"rel":"update","href":"/api/clientes/a5d2c4f8-9a41-4f21-8b77-d07a23bfa0e3","method":"PUT"},
+    {"rel":"delete","href":"/api/clientes/a5d2c4f8-9a41-4f21-8b77-d07a23bfa0e3","method":"DELETE"},
+    {"rel":"collection","href":"/api/clientes","method":"GET"}
+  ]
 }
 ```
 
-### Criar Garçom
-```json
-POST /api/garcons
-{
-  "nome": "Carlos Silva",
-  "matricula": "G001",
-  "telefone": "11911112222"
-}
-```
+---
 
-### Abrir Comanda
-```bash
-POST /api/comandas?mesaId={mesa-guid}&garcomId={garcom-guid}
-```
+## 🔗 Implementações Avançadas (HATEOAS e Search)
+
+### ✅ HATEOAS
+- Implementado via classe `HateoasHelper.cs`  
+- Cada resposta inclui links RESTful (`self`, `update`, `delete`, `collection`)
+- Implementado para `Clientes`, `Garçons`, `Mesas` e `Comandas`
+
+### ✅ Search com Paginação, Filtros e Ordenação
+- Endpoint: `/api/{entidade}/search`
+- Parâmetros:  
+  `nome`, `page`, `pageSize`, `sortBy`, `order`
+- Retorno inclui:
+  - Lista de itens paginados
+  - Total de páginas
+  - Links `next`, `prev`, `self`
 
 ---
 
 ## 🧠 Regras de Negócio Implementadas
 
-- Uma **comanda só pode ser aberta** se a mesa estiver **Disponível**.  
-- Ao **fechar uma comanda**, o status da mesa muda automaticamente para **Disponível**.  
+- Uma **comanda só pode ser aberta** se a mesa estiver **disponível**.  
+- Ao **fechar uma comanda**, a mesa volta a ficar **disponível**.  
 - **Garçons inativos** não podem abrir comandas.  
-- **Clientes** podem ser vinculados a **várias comandas**.  
-- Controle de **timestamps automáticos** para auditoria.  
-- Regras de negócio validadas via **entidades de domínio e exceções customizadas**.
+- **Clientes** podem ter múltiplas comandas abertas.  
+- Validação via **DTOs + DataAnnotations**.  
+- Paginação e ordenação dinâmicas nos endpoints `/search`.  
 
 ---
 
@@ -306,9 +291,9 @@ POST /api/comandas?mesaId={mesa-guid}&garcomId={garcom-guid}
 
 | Nome | RM | Função |
 |-------|-----|--------|
-| **Maria Eduarda Araujo Penas** | RM560944 | Desenvolvedora Backend |
+| **Maria Eduarda Araujo Penas** | RM560944 | Desenvolvedora Backend/ Infra |
 | **Alane Rocha da Sila** | RM561052 | Desenvolvedora Backend |
-| **Anna Beatriz de Araujo Bonfim** | RM559561 | Desenvolvedora Front/Infra |
+| **Anna Beatriz de Araujo Bonfim** | RM559561 | Desenvolvedora Front |
 
 ---
 
@@ -316,13 +301,13 @@ POST /api/comandas?mesaId={mesa-guid}&garcomId={garcom-guid}
 
 Desenvolvido por:
 
-- 💻 **Maria Eduarda Araujo Penas**
-- 📧 **eduarda.mpenas.com**
-- 🐙 **[GitHub: DudaAraujo14](https://github.com/DudaAraujo14)**
+- 💻 **Maria Eduarda Araujo Penas**  
+- 📧 **eduarda.mpenas@gmail.com**  
+- 🐙 **[GitHub: DudaAraujo14](https://github.com/DudaAraujo14)**  
 
 ---
 
 ## 📚 Orientado para
 
-- 🎓 **Projeto acadêmico FIAP — C#**
-- 🗓️ **Outubro / 2025**
+🎓 **Projeto acadêmico FIAP — Advanced Business Development with .NET**  
+🗓️ **Entrega: Novembro / 2025**
