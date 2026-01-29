@@ -1,0 +1,11 @@
+﻿.vs
+atendimentos/tests/Atendimentos.Tests/obj/Debug
+atendimentos/src/Atendimentos.Api/obj/Debug
+atendimentos/src/Atendimentos.Application/obj/Debug
+atendimentos/src/Atendimentos.Infrastructure/obj/Debug
+atendimentos/src/Atendimentos.Domain/obj/Debug
+atendimentos/src/Atendimentos.Api/obj
+atendimentos/src/Atendimentos.Application/obj
+atendimentos/tests/Atendimentos.Tests/obj
+atendimentos/src/Atendimentos.Infrastructure/obj
+atendimentos/src/Atendimentos.Domain/obj

@@ -25,7 +25,7 @@ namespace Atendimentos.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var cliente = await _service.CriarAsync(dto.Nome, dto.CPF, dto.Telefone);
+            var cliente = await _service.CriarAsync(dto.Nome, dto.Telefone);
 
             var resource = HateoasHelper.BuildResource(this, "clientes", cliente, cliente.Id);
 
@@ -119,7 +119,6 @@ namespace Atendimentos.Api.Controllers
     public class ClienteCreateDto
     {
         public string Nome { get; set; } = string.Empty;
-        public string CPF { get; set; } = string.Empty;
         public string Telefone { get; set; } = string.Empty;
     }
 }
