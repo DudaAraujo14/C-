@@ -31,6 +31,11 @@ namespace Atendimentos.Application.Services
             });
         }
 
+        /// <summary>
+        /// Obtem um garcom por ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<GarcomDto?> ObterPorIdAsync(Guid id)
         {
             var garcom = await _garcomRepository.ObterPorIdAsync(id);
