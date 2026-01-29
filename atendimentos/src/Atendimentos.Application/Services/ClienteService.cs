@@ -8,7 +8,7 @@ namespace Atendimentos.Application.Services
 {
     public interface IClienteService
     {
-        Task<Cliente> CriarAsync(string nome, string cpf, string telefone);
+        Task<Cliente> CriarAsync(string nome, string telefone);
         Task<IEnumerable<Cliente>> ObterTodosAsync();
         Task<Cliente?> ObterPorIdAsync(Guid id);
         Task DeletarAsync(Guid id);
@@ -23,9 +23,9 @@ namespace Atendimentos.Application.Services
             _repository = repository;
         }
 
-        public async Task<Cliente> CriarAsync(string nome, string cpf, string telefone)
+        public async Task<Cliente> CriarAsync(string nome, string telefone)
         {
-            var cliente = new Cliente(nome, cpf, telefone);
+            var cliente = new Cliente(nome, telefone);
             return await _repository.CriarAsync(cliente);
         }
 
