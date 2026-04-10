@@ -13,7 +13,7 @@ namespace Atendimentos.Infrastructure.Context
         public DbSet<Mesa> Mesas { get; set; }
         public DbSet<Garcom> Garcons { get; set; }
         public DbSet<Comanda> Comandas { get; set; }
-        public DbSet<Cliente> Clientes { get; set; } // ✅ Adicionado
+        public DbSet<Cliente> Clientes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -82,7 +82,6 @@ namespace Atendimentos.Infrastructure.Context
                 entity.ToTable("CLIENTES");
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Nome).IsRequired().HasMaxLength(120);
-                entity.Property(c => c.CPF).IsRequired().HasMaxLength(14);
                 entity.Property(c => c.Telefone).HasMaxLength(20);
                 entity.Property(c => c.DataCadastro).IsRequired();
             });
