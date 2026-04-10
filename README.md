@@ -536,4 +536,4 @@ Desenvolvido por:
 ## 📚 Orientado para
 
 🎓 **Projeto acadêmico FIAP — Advanced Business Development with .NET**  
-🗓️ **Entrega: Novembro / 2025**
+🗓️ **Entrega: abril / 2026**
