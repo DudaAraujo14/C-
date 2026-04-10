@@ -287,6 +287,229 @@ Exemplo de retorno com **HATEOAS**:
 
 ---
 
+# 🚀 — Observabilidade e Testes Automatizados
+
+Nesta etapa do projeto, foram adicionadas funcionalidades avançadas de **monitoramento, observabilidade e testes automatizados**, elevando o sistema para um padrão mais próximo de aplicações reais de mercado.
+
+---
+
+## 📊 Monitoramento e Observabilidade
+
+### ❤️ Health Checks
+
+Foi implementado um endpoint de verificação de saúde da aplicação:
+
+Com a API rodando, acesse:
+
+```
+http://localhost:5070/health
+```
+
+📌 **Objetivo:**
+
+* Verificar saúde da aplicação
+* Validar conexão com banco
+
+
+```http
+GET /health
+```
+
+### ✔️ Funcionalidades:
+
+* Verificação do status da API
+* Verificação da conexão com o banco de dados
+* Retorno estruturado em JSON
+
+### 📌 Exemplo de resposta:
+
+```json
+{
+  "status": "Healthy",
+  "totalDuration": "00:00:00.013",
+  "checks": [
+    {
+      "name": "Database",
+      "status": "Healthy",
+      "duration": "00:00:00.005"
+    }
+  ]
+}
+```
+
+---
+
+### 🧾 Logging Estruturado (Serilog)
+
+Foi configurado logging estruturado utilizando **Serilog**, permitindo rastreamento detalhado da aplicação.
+
+
+### ✔️ Implementado:
+
+* Logs de requisições HTTP
+* Logs de erro e exceções
+* Saída no console
+* Persistência em arquivos (`/logs`)
+
+### 📌 Exemplo:
+
+```
+HTTP GET /api/clientes responded 200 in 45 ms
+```
+
+---
+
+### 🔍 Tracing e Métricas (OpenTelemetry)
+
+Foi implementado **OpenTelemetry** para rastreamento distribuído e coleta de métricas.
+
+Após rodar a aplicação:
+
+📁 Será criada automaticamente a pasta:
+
+```
+/logs
+```
+
+📌 **Arquivos:**
+
+* `log-YYYY-MM-DD.txt`
+
+📌 **Quando usar:**
+
+* Para analisar erros
+* Para rastrear requisições
+
+### ✔️ Funcionalidades:
+
+* Rastreamento de requisições HTTP
+* Tempo de resposta (latência)
+* Métricas de desempenho
+* Exportação para console
+
+### 📌 Exemplo:
+
+```
+Activity.TraceId: ...
+Request GET /api/clientes
+Duration: 45ms
+```
+
+---
+
+## 🧪 Testes Automatizados — Padrão AAA
+
+### 🔹 Testes Unitários
+
+Implementados com:
+
+* **xUnit**
+* **Moq**
+* Padrão **AAA (Arrange, Act, Assert)**
+
+### ✔️ Cenários testados:
+
+* Criação de cliente
+* Consulta por ID
+* Exclusão
+
+---
+
+### 🔹 Testes de Integração
+
+Implementados utilizando:
+
+* **WebApplicationFactory**
+* **InMemory Database (EF Core)**
+
+### ✔️ Cenários:
+
+* `POST /api/clientes`
+* `GET /api/clientes`
+
+### 🎯 Benefícios:
+
+* Teste do fluxo completo da API
+* Sem dependência de banco real
+* Execução rápida e isolada
+
+---
+
+## 🧪 Execução dos Testes
+
+Para executar os testes:
+
+```bash
+dotnet test
+```
+
+---
+
+## 📸 Evidências (Sprint 3)
+
+
+### 🔹 Swagger (visão geral)
+![Swagger](images/swagger-home.png)
+
+---
+
+### 🔹 Execução do endpoint /api/clientes
+![Swagger Response](images/api-clientes-swagger-response.png)
+
+---
+
+### 🔹 Resposta JSON da API
+![JSON](images/api-clientes-json.png)
+
+---
+
+### 🔹 Health Check
+![Health](images/health-check.png)
+
+---
+
+### 🔹 Logs (Serilog)
+
+![Logs Serilog](images/logs-serilog.png)
+
+---
+
+### 🔹 OpenTelemetry (Tracing e Métricas)
+
+![OpenTelemetry](images/opentelemetry-trace.png)
+
+---
+
+### 🔹 Testes Automatizados
+
+![TesteAutomatizado](images/dotnet-test.png)
+
+---
+
+## 🧠 Evolução do Projeto
+
+Com a Sprint 3, o sistema passou a contar com:
+
+* Monitoramento de saúde da aplicação
+* Logging estruturado
+* Rastreamento de requisições
+* Métricas de desempenho
+* Testes automatizados completos
+
+---
+
+## 🏆 Conclusão da Sprint
+
+A aplicação agora possui características essenciais de sistemas modernos:
+
+* Alta observabilidade
+* Melhor diagnóstico de erros
+* Maior confiabilidade
+* Código testável e escalável
+
+---
+
+
 ## 👥 Integrantes do Grupo
 
 | Nome | RM | Função |
