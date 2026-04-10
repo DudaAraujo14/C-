@@ -19,7 +19,7 @@ O objetivo é oferecer uma base sólida e escalável para sistemas de gestão de
 10. [💾 Exemplos de Uso (Swagger)](#-exemplos-de-uso-swagger)  
 11. [🔗 Implementações Avançadas (HATEOAS e Search)](#-implementações-avançadas-hateoas-e-search)  
 12. [🧠 Regras de Negócio Implementadas](#-regras-de-negócio-implementadas)  
-13. [🚀 Observabilidade e Testes Automatizados] (#-oservabilidade-e-testes-automatizados)
+13. 13. [📈 Observabilidade e Testes Automatizados](#observabilidade-e-testes-automatizados)
 14. [👥 Integrantes do Grupo](#-integrantes-do-grupo)  
 
 ---
